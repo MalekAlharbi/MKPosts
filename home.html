@@ -225,17 +225,29 @@
 </body>
 <script>
     const baseURL = "https://tarmeezacademy.com/api/v1"
-    function getPosts(){
-        axios.get(`${baseURL}/posts?limit=10`)
+    let currentPage = 1;
+    let lastPage
+    // Infinite Scrolling
+    window.addEventListener("scroll",() => {
+        const endOfPage = window.scrollY + window.innerHeight +1 >= document.documentElement.scrollHeight;
+
+        if(endOfPage && (currentPage < lastPage)){
+            getPosts(currentPage++)
+        }
+    })
+    // --Infinite Scrolling--
+    function getPosts(page){
+        axios.get(`${baseURL}/posts?limit=10&page=${currentPage}`)
             .then(function (response) {
             // handle success
             const posts = response.data.data;
-            document.getElementById('posts').innerHTML = "";
-            
+            lastPage = response.data.meta.last_page
+            if(currentPage == 1){
+                document.getElementById('posts').innerHTML = "";
+            }
             for (const post of posts) {
                 let categories = ``;
 
-                console.log(post.tags)
                 for (const cat of post.tags) {
                     categories += `<div class="mb-2 bg-gray-500 text-white w-fit pt-1 pb-1 pl-2 pr-2 rounded-2xl">${cat}</div>`
                 }
